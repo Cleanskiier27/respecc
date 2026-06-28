@@ -27,18 +27,14 @@
       cursor: crosshair;
     }
 
-    /* ── CANVAS (starfield + tunnel) ── */
-    #bg { position: fixed; inset: 0; z-index: 0; }
-
-    /* ── MATRIX RAIN ── */
+    #bg     { position: fixed; inset: 0; z-index: 0; }
     #matrix { position: fixed; inset: 0; z-index: 1; opacity: 0.18; pointer-events: none; }
 
-    /* ── CONTENT ── */
     #app {
       position: relative; z-index: 10;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      height: 100vh; gap: 2rem;
+      height: 100vh; gap: 1.6rem;
       padding: 1rem;
     }
 
@@ -50,165 +46,135 @@
       letter-spacing: 0.15em;
       text-transform: uppercase;
       color: #fff;
-      text-shadow:
-        0 0 8px var(--neon-purple),
-        0 0 20px var(--neon-purple),
-        0 0 50px var(--neon-purple);
+      text-shadow: 0 0 8px var(--neon-purple), 0 0 20px var(--neon-purple), 0 0 50px var(--neon-purple);
       animation: flicker 4s infinite;
     }
-    .glitch::before,
-    .glitch::after {
+    .glitch::before, .glitch::after {
       content: attr(data-text);
-      position: absolute; top: 0; left: 0; width: 100%;
-      overflow: hidden;
+      position: absolute; top: 0; left: 0; width: 100%; overflow: hidden;
     }
     .glitch::before {
-      left: 3px; top: 2px;
-      color: var(--neon-cyan);
+      left: 3px; top: 2px; color: var(--neon-cyan);
       clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
-      animation: glitch-top 2.5s infinite;
-      text-shadow: none;
+      animation: glitch-top 2.5s infinite; text-shadow: none;
     }
     .glitch::after {
-      left: -3px; top: -2px;
-      color: var(--neon-pink);
+      left: -3px; top: -2px; color: var(--neon-pink);
       clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
-      animation: glitch-bot 2.5s infinite 0.3s;
-      text-shadow: none;
+      animation: glitch-bot 2.5s infinite 0.3s; text-shadow: none;
     }
     @keyframes glitch-top {
       0%,90%,100% { transform: translate(0); opacity: 1; }
-      91% { transform: translate(-4px, 1px); opacity: 0.9; }
-      93% { transform: translate(4px, -1px); opacity: 0.8; }
-      95% { transform: translate(-2px, 0); opacity: 1; }
+      91% { transform: translate(-4px,1px); opacity:.9; }
+      93% { transform: translate(4px,-1px); opacity:.8; }
+      95% { transform: translate(-2px,0);   opacity:1; }
     }
     @keyframes glitch-bot {
       0%,85%,100% { transform: translate(0); opacity: 1; }
-      86% { transform: translate(4px, 2px); opacity: 0.9; }
-      88% { transform: translate(-4px, -2px); opacity: 0.8; }
-      90% { transform: translate(2px, 0); opacity: 1; }
+      86% { transform: translate(4px,2px);  opacity:.9; }
+      88% { transform: translate(-4px,-2px);opacity:.8; }
+      90% { transform: translate(2px,0);    opacity:1; }
     }
     @keyframes flicker {
-      0%,97%,100% { opacity: 1; }
-      98% { opacity: 0.6; }
-      99% { opacity: 1; }
-      99.5% { opacity: 0.3; }
+      0%,97%,100% { opacity:1; } 98% { opacity:.6; } 99% { opacity:1; } 99.5% { opacity:.3; }
     }
 
     /* ── SUBTITLE ── */
     .subtitle {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(0.65rem, 2vw, 1rem);
-      letter-spacing: 0.4em;
-      color: var(--neon-cyan);
+      letter-spacing: 0.4em; color: var(--neon-cyan);
       text-shadow: 0 0 10px var(--neon-cyan);
       animation: pulse-text 2s ease-in-out infinite;
       text-transform: uppercase;
     }
-    @keyframes pulse-text {
-      0%,100% { opacity: 1; }
-      50%      { opacity: 0.4; }
+    @keyframes pulse-text { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+    /* ── AUDIO STATUS ── */
+    #audio-status {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.55rem, 1.3vw, 0.75rem);
+      letter-spacing: 0.2em;
+      padding: 0.3em 0.9em;
+      border: 1px solid #444;
+      border-radius: 2px;
+      color: #888;
+      transition: color 0.3s, border-color 0.3s, text-shadow 0.3s;
+    }
+    #audio-status.active {
+      color: var(--neon-green);
+      border-color: var(--neon-green);
+      text-shadow: 0 0 8px var(--neon-green);
+    }
+    #audio-status.mic {
+      color: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      text-shadow: 0 0 8px var(--neon-cyan);
     }
 
     /* ── BEAT VISUALIZER ── */
     #visualizer {
       display: flex; align-items: flex-end;
-      gap: 4px; height: 80px;
+      gap: 3px; height: 90px;
+      padding: 0 4px;
     }
     .bar {
-      width: clamp(6px, 1.5vw, 14px);
+      flex: 1; max-width: 18px; min-width: 5px;
       background: linear-gradient(to top, var(--neon-purple), var(--neon-cyan));
       border-radius: 3px 3px 0 0;
       box-shadow: 0 0 8px var(--neon-purple);
-      transform-origin: bottom;
-      animation: beat var(--dur, 0.4s) ease-in-out infinite alternate;
-      animation-delay: var(--del, 0s);
-    }
-    @keyframes beat {
-      from { transform: scaleY(0.1); opacity: 0.5; }
-      to   { transform: scaleY(1);   opacity: 1;   }
+      transition: height 0.05s ease-out;
+      height: 4px;
     }
 
     /* ── TERMINAL TICKER ── */
     #ticker {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(0.55rem, 1.4vw, 0.85rem);
-      color: var(--neon-green);
-      text-shadow: 0 0 6px var(--neon-green);
-      letter-spacing: 0.15em;
-      white-space: nowrap;
-      overflow: hidden;
-      max-width: 90vw;
-      border-left: 2px solid var(--neon-green);
-      padding-left: 0.6em;
+      color: var(--neon-green); text-shadow: 0 0 6px var(--neon-green);
+      letter-spacing: 0.15em; white-space: nowrap; overflow: hidden;
+      max-width: 90vw; border-left: 2px solid var(--neon-green); padding-left: 0.6em;
     }
     #cursor { animation: blink 0.8s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
 
     /* ── BUTTONS ── */
-    .btn-row { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+    .btn-row { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
     .btn {
-      padding: 0.6em 1.6em;
-      border: 2px solid var(--neon-gold);
-      background: transparent;
-      color: var(--neon-gold);
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(0.6rem, 1.5vw, 0.85rem);
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: color 0.2s;
-      box-shadow: 0 0 10px var(--neon-gold), inset 0 0 10px transparent;
+      padding: 0.6em 1.4em;
+      border: 2px solid var(--neon-gold); background: transparent;
+      color: var(--neon-gold); font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.55rem, 1.4vw, 0.8rem); font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer;
+      position: relative; overflow: hidden; transition: color 0.2s;
+      box-shadow: 0 0 10px var(--neon-gold);
     }
     .btn::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: var(--neon-gold);
-      transform: translateX(-110%);
-      transition: transform 0.25s ease;
-      z-index: -1;
+      content: ''; position: absolute; inset: 0; background: var(--neon-gold);
+      transform: translateX(-110%); transition: transform 0.25s ease; z-index: -1;
     }
     .btn:hover { color: #000; }
     .btn:hover::before { transform: translateX(0); }
     .btn:active { transform: scale(0.95); }
+    .btn.live { border-color: var(--neon-pink); color: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink); }
+    .btn.live::before { background: var(--neon-pink); }
 
     /* ── CLICK RIPPLES ── */
     .ripple {
-      position: fixed;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--neon-purple);
-      transform: translate(-50%, -50%) scale(0);
-      pointer-events: none;
-      animation: ripple-out 0.7s ease-out forwards;
-      z-index: 999;
+      position: fixed; width: 8px; height: 8px; border-radius: 50%;
+      transform: translate(-50%,-50%) scale(0); pointer-events: none;
+      animation: ripple-out 0.7s ease-out forwards; z-index: 999;
     }
-    @keyframes ripple-out {
-      to { transform: translate(-50%, -50%) scale(30); opacity: 0; }
-    }
+    @keyframes ripple-out { to { transform: translate(-50%,-50%) scale(30); opacity: 0; } }
 
-    /* ── SCANLINES OVERLAY ── */
     #scanlines {
-      position: fixed; inset: 0; z-index: 20;
-      pointer-events: none;
-      background: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 3px,
-        rgba(0,0,0,0.08) 3px,
-        rgba(0,0,0,0.08) 4px
-      );
+      position: fixed; inset: 0; z-index: 20; pointer-events: none;
+      background: repeating-linear-gradient(to bottom,
+        transparent 0px, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
     }
-
-    /* ── VIGNETTE ── */
     #vignette {
-      position: fixed; inset: 0; z-index: 15;
-      pointer-events: none;
-      background: radial-gradient(ellipse at center,
-        transparent 50%, rgba(0,0,0,0.75) 100%);
+      position: fixed; inset: 0; z-index: 15; pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.75) 100%);
     }
   </style>
 </head>
@@ -225,24 +191,28 @@
   </div>
   <div class="subtitle">trap · universe · hack · infinity</div>
 
+  <div id="audio-status">⬛ AUDIO OFFLINE</div>
   <div id="visualizer"></div>
 
   <div id="ticker"><span id="ticker-text"></span><span id="cursor">█</span></div>
 
   <div class="btn-row">
-    <button class="btn" onclick="dropBeat()">DROP BEAT</button>
-    <button class="btn" onclick="glitchBurst()">GLITCH</button>
-    <button class="btn" onclick="hyperspace()">HYPERSPACE</button>
+    <button class="btn" id="btn-beat"  onclick="toggleTrapBeat()">▶ DROP BEAT</button>
+    <button class="btn" id="btn-mic"   onclick="toggleMic()">🎙 MIC INPUT</button>
+    <button class="btn"                onclick="glitchBurst()">GLITCH</button>
+    <button class="btn"                onclick="hyperspace()">HYPERSPACE</button>
   </div>
 </div>
 
 <script>
+'use strict';
+
 /* ═══════════════════════════════════════
-   STARFIELD / TUNNEL BACKGROUND
+   STARFIELD
 ═══════════════════════════════════════ */
 const bgCanvas = document.getElementById('bg');
 const bgCtx    = bgCanvas.getContext('2d');
-let W, H, stars = [], tunnelAngle = 0;
+let W, H, stars = [];
 
 function resize() {
   W = bgCanvas.width  = window.innerWidth;
@@ -250,48 +220,34 @@ function resize() {
   matCanvas.width  = W;
   matCanvas.height = H;
   initStars();
+  initMatrix();
 }
 
 function initStars() {
   stars = Array.from({ length: 280 }, () => ({
     x: Math.random() * W - W / 2,
     y: Math.random() * H - H / 2,
-    z: Math.random() * W,
-    pz: 0,
-    hue: Math.random() * 60 + 240,   // blue-purple range
+    z: Math.random() * W, pz: 0,
+    hue: Math.random() * 60 + 240,
   }));
 }
 
 function drawStars() {
   bgCtx.fillStyle = 'rgba(4,0,10,0.25)';
   bgCtx.fillRect(0, 0, W, H);
-
   const speed = hyperspacing ? 35 : 6;
   const cx = W / 2, cy = H / 2;
-
   for (const s of stars) {
-    s.pz = s.z;
-    s.z -= speed;
-    if (s.z <= 0) {
-      s.x  = Math.random() * W - cx;
-      s.y  = Math.random() * H - cy;
-      s.z  = W;
-      s.pz = s.z;
-    }
-    const sx  = (s.x / s.z) * W + cx;
-    const sy  = (s.y / s.z) * W + cy;
-    const px  = (s.x / s.pz) * W + cx;
-    const py  = (s.y / s.pz) * W + cy;
-    const r   = Math.max(0, (1 - s.z / W) * 3);
-    const sat = hyperspacing ? '100%' : '70%';
-    bgCtx.strokeStyle = `hsl(${s.hue},${sat},80%)`;
+    s.pz = s.z; s.z -= speed;
+    if (s.z <= 0) { s.x = Math.random()*W-cx; s.y = Math.random()*H-cy; s.z = W; s.pz = s.z; }
+    const sx = (s.x/s.z)*W+cx, sy = (s.y/s.z)*W+cy;
+    const px = (s.x/s.pz)*W+cx, py = (s.y/s.pz)*W+cy;
+    const r  = Math.max(0,(1-s.z/W)*3);
+    bgCtx.strokeStyle = `hsl(${s.hue},${hyperspacing?'100%':'70%'},80%)`;
     bgCtx.lineWidth   = r;
     bgCtx.shadowColor = `hsl(${s.hue},100%,70%)`;
     bgCtx.shadowBlur  = hyperspacing ? 12 : 3;
-    bgCtx.beginPath();
-    bgCtx.moveTo(px, py);
-    bgCtx.lineTo(sx, sy);
-    bgCtx.stroke();
+    bgCtx.beginPath(); bgCtx.moveTo(px,py); bgCtx.lineTo(sx,sy); bgCtx.stroke();
   }
   bgCtx.shadowBlur = 0;
 }
@@ -313,52 +269,227 @@ function drawMatrix() {
   matCtx.fillStyle = 'rgba(4,0,10,0.05)';
   matCtx.fillRect(0, 0, W, H);
   matCtx.font = '14px "Share Tech Mono", monospace';
-
   for (let i = 0; i < drops.length; i++) {
-    const char = CHARS[Math.floor(Math.random() * CHARS.length)];
-    const x = i * 16;
-    const y = drops[i] * 16;
-    const bright = Math.random() > 0.95;
-    matCtx.fillStyle = bright ? '#fff' : '#39ff14';
-    matCtx.fillText(char, x, y);
+    const ch = CHARS[Math.floor(Math.random() * CHARS.length)];
+    const x = i * 16, y = drops[i] * 16;
+    matCtx.fillStyle = Math.random() > 0.95 ? '#fff' : '#39ff14';
+    matCtx.fillText(ch, x, y);
     if (y > H && Math.random() > 0.975) drops[i] = 0;
     drops[i]++;
   }
 }
 
 /* ═══════════════════════════════════════
-   BEAT VISUALIZER
+   VISUALIZER BARS
 ═══════════════════════════════════════ */
-const vizEl = document.getElementById('visualizer');
+const vizEl    = document.getElementById('visualizer');
 const BAR_COUNT = 32;
-const bars = [];
+const bars     = [];
+const BAR_COLORS = [
+  ['#bf00ff','#00fff7'],
+  ['#ff007f','#ffd700'],
+  ['#39ff14','#00fff7'],
+  ['#ffd700','#ff007f'],
+];
+let currentColorIdx = 0;
 
 for (let i = 0; i < BAR_COUNT; i++) {
   const b = document.createElement('div');
   b.className = 'bar';
-  const baseH = 20 + Math.sin(i * 0.4) * 40 + Math.random() * 20;
-  b.style.height = baseH + 'px';
-  b.style.setProperty('--dur',  (0.2 + Math.random() * 0.5) + 's');
-  b.style.setProperty('--del',  (i * 0.02)                  + 's');
   vizEl.appendChild(b);
   bars.push(b);
 }
 
-function dropBeat() {
+function setBarHeights(heights) {
+  const [lo, hi] = BAR_COLORS[currentColorIdx % BAR_COLORS.length];
   bars.forEach((b, i) => {
-    const h = 20 + Math.abs(Math.sin(i * 0.35 + Math.random())) * 70;
-    b.style.height = h + 'px';
-    b.style.setProperty('--dur', (0.1 + Math.random() * 0.3) + 's');
-    const colors = [
-      ['var(--neon-purple)','var(--neon-cyan)'],
-      ['var(--neon-pink)',  'var(--neon-gold)'],
-      ['var(--neon-green)', 'var(--neon-cyan)'],
-    ];
-    const c = colors[Math.floor(Math.random() * colors.length)];
-    b.style.background = `linear-gradient(to top, ${c[0]}, ${c[1]})`;
-    b.style.boxShadow  = `0 0 12px ${c[0]}`;
+    const h = Math.max(2, heights[i] || 2);
+    b.style.height    = h + 'px';
+    b.style.background = `linear-gradient(to top, ${lo}, ${hi})`;
+    b.style.boxShadow  = `0 0 ${Math.round(h/6)}px ${lo}`;
   });
+}
+
+/* ═══════════════════════════════════════
+   WEB AUDIO API — SHARED CONTEXT
+═══════════════════════════════════════ */
+let audioCtx   = null;
+let analyser   = null;
+let freqData   = null;
+
+function ensureAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 128;          // 64 frequency bins → maps to 32 bars
+    analyser.smoothingTimeConstant = 0.8;
+    freqData = new Uint8Array(analyser.frequencyBinCount);
+    analyser.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+/* ── Pull frequency data → push to bars ── */
+function audioFrame() {
+  if (!analyser) return;
+  analyser.getByteFrequencyData(freqData);
+  const step = Math.floor(freqData.length / BAR_COUNT);
+  const heights = Array.from({ length: BAR_COUNT }, (_, i) => {
+    const val = freqData[i * step] || 0;
+    return (val / 255) * 80 + 2;
+  });
+  setBarHeights(heights);
+}
+
+/* ═══════════════════════════════════════
+   TRAP BEAT SYNTH
+═══════════════════════════════════════ */
+let beatPlaying  = false;
+let beatInterval = null;
+let gainNode     = null;
+let trapNodes    = [];
+
+const BPM        = 140;
+const STEP_MS    = (60 / BPM / 4) * 1000;   // 16th-note grid
+
+// Trap hi-hat / snare / 808 pattern (16 steps)
+const patterns = {
+  kick:  [1,0,0,0, 0,0,1,0, 0,0,0,1, 0,1,0,0],
+  snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
+  hat:   [1,1,0,1, 1,1,0,1, 1,1,0,1, 1,0,1,1],
+};
+
+function playKick(t) {
+  const osc  = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(analyser);
+  osc.frequency.setValueAtTime(160, t);
+  osc.frequency.exponentialRampToValueAtTime(40, t + 0.15);
+  gain.gain.setValueAtTime(1.2, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+  osc.start(t); osc.stop(t + 0.3);
+  trapNodes.push(osc, gain);
+}
+
+function playSnare(t) {
+  const bufLen = audioCtx.sampleRate * 0.12;
+  const buf    = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const data   = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+  const src    = audioCtx.createBufferSource();
+  const gain   = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  src.buffer   = buf;
+  filter.type  = 'highpass'; filter.frequency.value = 1000;
+  src.connect(filter); filter.connect(gain); gain.connect(analyser);
+  gain.gain.setValueAtTime(0.7, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  src.start(t); src.stop(t + 0.12);
+  trapNodes.push(src, gain, filter);
+}
+
+function playHat(t) {
+  const bufLen = audioCtx.sampleRate * 0.04;
+  const buf    = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const data   = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1);
+  const src    = audioCtx.createBufferSource();
+  const gain   = audioCtx.createGain();
+  const filter = audioCtx.createBiquadFilter();
+  src.buffer   = buf;
+  filter.type  = 'highpass'; filter.frequency.value = 7000;
+  src.connect(filter); filter.connect(gain); gain.connect(analyser);
+  gain.gain.setValueAtTime(0.35, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+  src.start(t); src.stop(t + 0.04);
+  trapNodes.push(src, gain, filter);
+}
+
+let stepIdx = 0;
+function scheduleBeatStep() {
+  if (!beatPlaying) return;
+  const now = audioCtx.currentTime;
+  if (patterns.kick [stepIdx]) playKick (now);
+  if (patterns.snare[stepIdx]) playSnare(now);
+  if (patterns.hat  [stepIdx]) playHat  (now);
+  stepIdx = (stepIdx + 1) % 16;
+  // clean up old nodes
+  if (trapNodes.length > 200) trapNodes.splice(0, 100);
+}
+
+function startTrapBeat() {
+  ensureAudioCtx();
+  stepIdx      = 0;
+  beatPlaying  = true;
+  beatInterval = setInterval(scheduleBeatStep, STEP_MS);
+  currentColorIdx = 1;
+  setAudioStatus('⬛ TRAP BEAT LIVE — 140 BPM', 'active');
+  document.getElementById('btn-beat').textContent = '■ STOP BEAT';
+  document.getElementById('btn-beat').classList.add('live');
+}
+
+function stopTrapBeat() {
+  beatPlaying = false;
+  clearInterval(beatInterval);
+  beatInterval = null;
+  document.getElementById('btn-beat').textContent = '▶ DROP BEAT';
+  document.getElementById('btn-beat').classList.remove('live');
+  if (!micActive) setAudioStatus('⬛ AUDIO OFFLINE', '');
+}
+
+function toggleTrapBeat() {
+  if (beatPlaying) stopTrapBeat();
+  else             startTrapBeat();
   createRippleAt(window.innerWidth / 2, window.innerHeight / 2);
+}
+
+/* ═══════════════════════════════════════
+   MICROPHONE INPUT
+═══════════════════════════════════════ */
+let micActive  = false;
+let micStream  = null;
+let micSource  = null;
+
+async function toggleMic() {
+  if (micActive) {
+    stopMic();
+  } else {
+    await startMic();
+  }
+}
+
+async function startMic() {
+  try {
+    ensureAudioCtx();
+    micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    micSource = audioCtx.createMediaStreamSource(micStream);
+    micSource.connect(analyser);
+    micActive = true;
+    currentColorIdx = 2;
+    setAudioStatus('🎙 MIC LIVE — FREQUENCY LOCKED', 'mic');
+    document.getElementById('btn-mic').textContent = '🎙 STOP MIC';
+    document.getElementById('btn-mic').classList.add('live');
+  } catch (err) {
+    setAudioStatus('⚠ MIC DENIED — ' + err.message, '');
+  }
+}
+
+function stopMic() {
+  if (micSource)  { micSource.disconnect(); micSource = null; }
+  if (micStream)  { micStream.getTracks().forEach(t => t.stop()); micStream = null; }
+  micActive = false;
+  document.getElementById('btn-mic').textContent = '🎙 MIC INPUT';
+  document.getElementById('btn-mic').classList.remove('live');
+  if (!beatPlaying) setAudioStatus('⬛ AUDIO OFFLINE', '');
+}
+
+/* ═══════════════════════════════════════
+   AUDIO STATUS LABEL
+═══════════════════════════════════════ */
+function setAudioStatus(msg, cls) {
+  const el = document.getElementById('audio-status');
+  el.textContent = msg;
+  el.className   = cls ? 'active ' + cls : '';
 }
 
 /* ═══════════════════════════════════════
@@ -366,15 +497,16 @@ function dropBeat() {
 ═══════════════════════════════════════ */
 const lines = [
   '> INITIALIZING TRAP MATRIX...',
-  '> LOADING INFINITE UNIVERSE...',
-  '> HACKING THE VIBE PROTOCOL...',
+  '> AUDIO ENGINE: WEB AUDIO API CONNECTED',
+  '> ANALYSERNODE FFT: 128 BINS ACTIVE',
   '> 808 BASS DETECTED — FREQUENCY: ∞ Hz',
   '> RESPECC LEVEL: OVER 9000',
   '> DEPLOYING DRIP MODULE v2.0...',
-  '> ACTIVATING HYPNOTIC LOOP...',
+  '> MIC INPUT: PUSH/PULL FREQUENCY STREAM READY',
   '> SYNCHRONIZED WITH THE COSMOS',
   '> NO FEATURE TOO TRIPPY — NO BEAT TOO HEAVY',
   '> SYSTEM: ALL FREQUENCIES UNLOCKED',
+  '> BPM: 140 · TRAP GRID: 16 STEPS',
 ];
 let lineIdx = 0, charIdx = 0;
 const tickerText = document.getElementById('ticker-text');
@@ -382,15 +514,10 @@ const tickerText = document.getElementById('ticker-text');
 function typeLine() {
   const line = lines[lineIdx];
   if (charIdx <= line.length) {
-    tickerText.textContent = line.slice(0, charIdx);
-    charIdx++;
+    tickerText.textContent = line.slice(0, charIdx++);
     setTimeout(typeLine, 35 + Math.random() * 25);
   } else {
-    setTimeout(() => {
-      charIdx = 0;
-      lineIdx = (lineIdx + 1) % lines.length;
-      typeLine();
-    }, 1800);
+    setTimeout(() => { charIdx = 0; lineIdx = (lineIdx + 1) % lines.length; typeLine(); }, 1800);
   }
 }
 typeLine();
@@ -402,13 +529,9 @@ function glitchBurst() {
   const app = document.getElementById('app');
   let t = 0;
   const iv = setInterval(() => {
-    app.style.transform = `translate(${(Math.random()-0.5)*12}px, ${(Math.random()-0.5)*8}px)`;
+    app.style.transform = `translate(${(Math.random()-.5)*12}px,${(Math.random()-.5)*8}px)`;
     app.style.filter    = `hue-rotate(${Math.random()*360}deg) saturate(3)`;
-    if (++t > 20) {
-      clearInterval(iv);
-      app.style.transform = '';
-      app.style.filter    = '';
-    }
+    if (++t > 20) { clearInterval(iv); app.style.transform=''; app.style.filter=''; }
   }, 40);
 }
 
@@ -419,26 +542,21 @@ let hyperspacing = false;
 function hyperspace() {
   hyperspacing = true;
   document.body.style.transition = 'filter 0.3s';
-  document.body.style.filter = 'saturate(3) brightness(1.5)';
-  setTimeout(() => {
-    hyperspacing = false;
-    document.body.style.filter = '';
-  }, 2500);
+  document.body.style.filter     = 'saturate(3) brightness(1.5)';
+  setTimeout(() => { hyperspacing = false; document.body.style.filter = ''; }, 2500);
 }
 
 /* ═══════════════════════════════════════
    CLICK RIPPLES
 ═══════════════════════════════════════ */
+const RIPPLE_COLORS = ['var(--neon-purple)','var(--neon-cyan)','var(--neon-pink)','var(--neon-gold)'];
+
 function createRippleAt(x, y) {
-  const colors = [
-    'var(--neon-purple)', 'var(--neon-cyan)',
-    'var(--neon-pink)',   'var(--neon-gold)'
-  ];
   const el = document.createElement('div');
   el.className = 'ripple';
-  el.style.left = x + 'px';
-  el.style.top  = y + 'px';
-  el.style.background = colors[Math.floor(Math.random() * colors.length)];
+  el.style.left       = x + 'px';
+  el.style.top        = y + 'px';
+  el.style.background = RIPPLE_COLORS[Math.floor(Math.random() * RIPPLE_COLORS.length)];
   document.body.appendChild(el);
   el.addEventListener('animationend', () => el.remove());
 }
@@ -446,17 +564,32 @@ function createRippleAt(x, y) {
 document.addEventListener('click', e => createRippleAt(e.clientX, e.clientY));
 
 /* ═══════════════════════════════════════
+   IDLE VISUALIZER (no audio)
+═══════════════════════════════════════ */
+let idlePhase = 0;
+function idleFrame() {
+  if (analyser) return;   // audio driving it
+  idlePhase += 0.06;
+  const heights = Array.from({ length: BAR_COUNT }, (_, i) =>
+    6 + Math.abs(Math.sin(i * 0.4 + idlePhase)) * 18 +
+        Math.abs(Math.sin(i * 0.15 + idlePhase * 0.7)) * 12
+  );
+  setBarHeights(heights);
+}
+
+/* ═══════════════════════════════════════
    MAIN LOOP
 ═══════════════════════════════════════ */
 function loop() {
   drawStars();
   drawMatrix();
+  if (analyser) audioFrame();
+  else          idleFrame();
   requestAnimationFrame(loop);
 }
 
-window.addEventListener('resize', () => { resize(); initMatrix(); });
+window.addEventListener('resize', resize);
 resize();
-initMatrix();
 loop();
 </script>
 </body>
