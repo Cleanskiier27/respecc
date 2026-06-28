@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RESPECC — TRAP UNIVERSE</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --neon-purple: #bf00ff;
+      --neon-cyan:   #00fff7;
+      --neon-gold:   #ffd700;
+      --neon-pink:   #ff007f;
+      --neon-green:  #39ff14;
+      --dark:        #04000a;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--dark);
+      font-family: 'Orbitron', sans-serif;
+      color: #fff;
+      cursor: crosshair;
+    }
+
+    /* ── CANVAS (starfield + tunnel) ── */
+    #bg { position: fixed; inset: 0; z-index: 0; }
+
+    /* ── MATRIX RAIN ── */
+    #matrix { position: fixed; inset: 0; z-index: 1; opacity: 0.18; pointer-events: none; }
+
+    /* ── CONTENT ── */
+    #app {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100vh; gap: 2rem;
+      padding: 1rem;
+    }
+
+    /* ── GLITCH TITLE ── */
+    .glitch-wrap { position: relative; text-align: center; }
+    .glitch {
+      font-size: clamp(2.5rem, 8vw, 7rem);
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow:
+        0 0 8px var(--neon-purple),
+        0 0 20px var(--neon-purple),
+        0 0 50px var(--neon-purple);
+      animation: flicker 4s infinite;
+    }
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute; top: 0; left: 0; width: 100%;
+      overflow: hidden;
+    }
+    .glitch::before {
+      left: 3px; top: 2px;
+      color: var(--neon-cyan);
+      clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+      animation: glitch-top 2.5s infinite;
+      text-shadow: none;
+    }
+    .glitch::after {
+      left: -3px; top: -2px;
+      color: var(--neon-pink);
+      clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+      animation: glitch-bot 2.5s infinite 0.3s;
+      text-shadow: none;
+    }
+    @keyframes glitch-top {
+      0%,90%,100% { transform: translate(0); opacity: 1; }
+      91% { transform: translate(-4px, 1px); opacity: 0.9; }
+      93% { transform: translate(4px, -1px); opacity: 0.8; }
+      95% { transform: translate(-2px, 0); opacity: 1; }
+    }
+    @keyframes glitch-bot {
+      0%,85%,100% { transform: translate(0); opacity: 1; }
+      86% { transform: translate(4px, 2px); opacity: 0.9; }
+      88% { transform: translate(-4px, -2px); opacity: 0.8; }
+      90% { transform: translate(2px, 0); opacity: 1; }
+    }
+    @keyframes flicker {
+      0%,97%,100% { opacity: 1; }
+      98% { opacity: 0.6; }
+      99% { opacity: 1; }
+      99.5% { opacity: 0.3; }
+    }
+
+    /* ── SUBTITLE ── */
+    .subtitle {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.65rem, 2vw, 1rem);
+      letter-spacing: 0.4em;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px var(--neon-cyan);
+      animation: pulse-text 2s ease-in-out infinite;
+      text-transform: uppercase;
+    }
+    @keyframes pulse-text {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.4; }
+    }
+
+    /* ── BEAT VISUALIZER ── */
+    #visualizer {
+      display: flex; align-items: flex-end;
+      gap: 4px; height: 80px;
+    }
+    .bar {
+      width: clamp(6px, 1.5vw, 14px);
+      background: linear-gradient(to top, var(--neon-purple), var(--neon-cyan));
+      border-radius: 3px 3px 0 0;
+      box-shadow: 0 0 8px var(--neon-purple);
+      transform-origin: bottom;
+      animation: beat var(--dur, 0.4s) ease-in-out infinite alternate;
+      animation-delay: var(--del, 0s);
+    }
+    @keyframes beat {
+      from { transform: scaleY(0.1); opacity: 0.5; }
+      to   { transform: scaleY(1);   opacity: 1;   }
+    }
+
+    /* ── TERMINAL TICKER ── */
+    #ticker {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: clamp(0.55rem, 1.4vw, 0.85rem);
+      color: var(--neon-green);
+      text-shadow: 0 0 6px var(--neon-green);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+      overflow: hidden;
+      max-width: 90vw;
+      border-left: 2px solid var(--neon-green);
+      padding-left: 0.6em;
+    }
+    #cursor { animation: blink 0.8s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      padding: 0.6em 1.6em;
+      border: 2px solid var(--neon-gold);
+      background: transparent;
+      color: var(--neon-gold);
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(0.6rem, 1.5vw, 0.85rem);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.2s;
+      box-shadow: 0 0 10px var(--neon-gold), inset 0 0 10px transparent;
+    }
+    .btn::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--neon-gold);
+      transform: translateX(-110%);
+      transition: transform 0.25s ease;
+      z-index: -1;
+    }
+    .btn:hover { color: #000; }
+    .btn:hover::before { transform: translateX(0); }
+    .btn:active { transform: scale(0.95); }
+
+    /* ── CLICK RIPPLES ── */
+    .ripple {
+      position: fixed;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--neon-purple);
+      transform: translate(-50%, -50%) scale(0);
+      pointer-events: none;
+      animation: ripple-out 0.7s ease-out forwards;
+      z-index: 999;
+    }
+    @keyframes ripple-out {
+      to { transform: translate(-50%, -50%) scale(30); opacity: 0; }
+    }
+
+    /* ── SCANLINES OVERLAY ── */
+    #scanlines {
+      position: fixed; inset: 0; z-index: 20;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.08) 3px,
+        rgba(0,0,0,0.08) 4px
+      );
+    }
+
+    /* ── VIGNETTE ── */
+    #vignette {
+      position: fixed; inset: 0; z-index: 15;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center,
+        transparent 50%, rgba(0,0,0,0.75) 100%);
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<canvas id="matrix"></canvas>
+<div id="scanlines"></div>
+<div id="vignette"></div>
+
+<div id="app">
+  <div class="glitch-wrap">
+    <div class="glitch" data-text="RESPECC">RESPECC</div>
+  </div>
+  <div class="subtitle">trap · universe · hack · infinity</div>
+
+  <div id="visualizer"></div>
+
+  <div id="ticker"><span id="ticker-text"></span><span id="cursor">█</span></div>
+
+  <div class="btn-row">
+    <button class="btn" onclick="dropBeat()">DROP BEAT</button>
+    <button class="btn" onclick="glitchBurst()">GLITCH</button>
+    <button class="btn" onclick="hyperspace()">HYPERSPACE</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   STARFIELD / TUNNEL BACKGROUND
+═══════════════════════════════════════ */
+const bgCanvas = document.getElementById('bg');
+const bgCtx    = bgCanvas.getContext('2d');
+let W, H, stars = [], tunnelAngle = 0;
+
+function resize() {
+  W = bgCanvas.width  = window.innerWidth;
+  H = bgCanvas.height = window.innerHeight;
+  matCanvas.width  = W;
+  matCanvas.height = H;
+  initStars();
+}
+
+function initStars() {
+  stars = Array.from({ length: 280 }, () => ({
+    x: Math.random() * W - W / 2,
+    y: Math.random() * H - H / 2,
+    z: Math.random() * W,
+    pz: 0,
+    hue: Math.random() * 60 + 240,   // blue-purple range
+  }));
+}
+
+function drawStars() {
+  bgCtx.fillStyle = 'rgba(4,0,10,0.25)';
+  bgCtx.fillRect(0, 0, W, H);
+
+  const speed = hyperspacing ? 35 : 6;
+  const cx = W / 2, cy = H / 2;
+
+  for (const s of stars) {
+    s.pz = s.z;
+    s.z -= speed;
+    if (s.z <= 0) {
+      s.x  = Math.random() * W - cx;
+      s.y  = Math.random() * H - cy;
+      s.z  = W;
+      s.pz = s.z;
+    }
+    const sx  = (s.x / s.z) * W + cx;
+    const sy  = (s.y / s.z) * W + cy;
+    const px  = (s.x / s.pz) * W + cx;
+    const py  = (s.y / s.pz) * W + cy;
+    const r   = Math.max(0, (1 - s.z / W) * 3);
+    const sat = hyperspacing ? '100%' : '70%';
+    bgCtx.strokeStyle = `hsl(${s.hue},${sat},80%)`;
+    bgCtx.lineWidth   = r;
+    bgCtx.shadowColor = `hsl(${s.hue},100%,70%)`;
+    bgCtx.shadowBlur  = hyperspacing ? 12 : 3;
+    bgCtx.beginPath();
+    bgCtx.moveTo(px, py);
+    bgCtx.lineTo(sx, sy);
+    bgCtx.stroke();
+  }
+  bgCtx.shadowBlur = 0;
+}
+
+/* ═══════════════════════════════════════
+   MATRIX RAIN
+═══════════════════════════════════════ */
+const matCanvas = document.getElementById('matrix');
+const matCtx    = matCanvas.getContext('2d');
+const CHARS = 'RESPECCTRAPUNIVERSEHACK01アイウエオカキクケコサシスセソ';
+let drops = [];
+
+function initMatrix() {
+  const cols = Math.floor(W / 16);
+  drops = Array.from({ length: cols }, () => Math.floor(Math.random() * -50));
+}
+
+function drawMatrix() {
+  matCtx.fillStyle = 'rgba(4,0,10,0.05)';
+  matCtx.fillRect(0, 0, W, H);
+  matCtx.font = '14px "Share Tech Mono", monospace';
+
+  for (let i = 0; i < drops.length; i++) {
+    const char = CHARS[Math.floor(Math.random() * CHARS.length)];
+    const x = i * 16;
+    const y = drops[i] * 16;
+    const bright = Math.random() > 0.95;
+    matCtx.fillStyle = bright ? '#fff' : '#39ff14';
+    matCtx.fillText(char, x, y);
+    if (y > H && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+
+/* ═══════════════════════════════════════
+   BEAT VISUALIZER
+═══════════════════════════════════════ */
+const vizEl = document.getElementById('visualizer');
+const BAR_COUNT = 32;
+const bars = [];
+
+for (let i = 0; i < BAR_COUNT; i++) {
+  const b = document.createElement('div');
+  b.className = 'bar';
+  const baseH = 20 + Math.sin(i * 0.4) * 40 + Math.random() * 20;
+  b.style.height = baseH + 'px';
+  b.style.setProperty('--dur',  (0.2 + Math.random() * 0.5) + 's');
+  b.style.setProperty('--del',  (i * 0.02)                  + 's');
+  vizEl.appendChild(b);
+  bars.push(b);
+}
+
+function dropBeat() {
+  bars.forEach((b, i) => {
+    const h = 20 + Math.abs(Math.sin(i * 0.35 + Math.random())) * 70;
+    b.style.height = h + 'px';
+    b.style.setProperty('--dur', (0.1 + Math.random() * 0.3) + 's');
+    const colors = [
+      ['var(--neon-purple)','var(--neon-cyan)'],
+      ['var(--neon-pink)',  'var(--neon-gold)'],
+      ['var(--neon-green)', 'var(--neon-cyan)'],
+    ];
+    const c = colors[Math.floor(Math.random() * colors.length)];
+    b.style.background = `linear-gradient(to top, ${c[0]}, ${c[1]})`;
+    b.style.boxShadow  = `0 0 12px ${c[0]}`;
+  });
+  createRippleAt(window.innerWidth / 2, window.innerHeight / 2);
+}
+
+/* ═══════════════════════════════════════
+   TERMINAL TICKER
+═══════════════════════════════════════ */
+const lines = [
+  '> INITIALIZING TRAP MATRIX...',
+  '> LOADING INFINITE UNIVERSE...',
+  '> HACKING THE VIBE PROTOCOL...',
+  '> 808 BASS DETECTED — FREQUENCY: ∞ Hz',
+  '> RESPECC LEVEL: OVER 9000',
+  '> DEPLOYING DRIP MODULE v2.0...',
+  '> ACTIVATING HYPNOTIC LOOP...',
+  '> SYNCHRONIZED WITH THE COSMOS',
+  '> NO FEATURE TOO TRIPPY — NO BEAT TOO HEAVY',
+  '> SYSTEM: ALL FREQUENCIES UNLOCKED',
+];
+let lineIdx = 0, charIdx = 0;
+const tickerText = document.getElementById('ticker-text');
+
+function typeLine() {
+  const line = lines[lineIdx];
+  if (charIdx <= line.length) {
+    tickerText.textContent = line.slice(0, charIdx);
+    charIdx++;
+    setTimeout(typeLine, 35 + Math.random() * 25);
+  } else {
+    setTimeout(() => {
+      charIdx = 0;
+      lineIdx = (lineIdx + 1) % lines.length;
+      typeLine();
+    }, 1800);
+  }
+}
+typeLine();
+
+/* ═══════════════════════════════════════
+   GLITCH BURST
+═══════════════════════════════════════ */
+function glitchBurst() {
+  const app = document.getElementById('app');
+  let t = 0;
+  const iv = setInterval(() => {
+    app.style.transform = `translate(${(Math.random()-0.5)*12}px, ${(Math.random()-0.5)*8}px)`;
+    app.style.filter    = `hue-rotate(${Math.random()*360}deg) saturate(3)`;
+    if (++t > 20) {
+      clearInterval(iv);
+      app.style.transform = '';
+      app.style.filter    = '';
+    }
+  }, 40);
+}
+
+/* ═══════════════════════════════════════
+   HYPERSPACE
+═══════════════════════════════════════ */
+let hyperspacing = false;
+function hyperspace() {
+  hyperspacing = true;
+  document.body.style.transition = 'filter 0.3s';
+  document.body.style.filter = 'saturate(3) brightness(1.5)';
+  setTimeout(() => {
+    hyperspacing = false;
+    document.body.style.filter = '';
+  }, 2500);
+}
+
+/* ═══════════════════════════════════════
+   CLICK RIPPLES
+═══════════════════════════════════════ */
+function createRippleAt(x, y) {
+  const colors = [
+    'var(--neon-purple)', 'var(--neon-cyan)',
+    'var(--neon-pink)',   'var(--neon-gold)'
+  ];
+  const el = document.createElement('div');
+  el.className = 'ripple';
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.style.background = colors[Math.floor(Math.random() * colors.length)];
+  document.body.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+}
+
+document.addEventListener('click', e => createRippleAt(e.clientX, e.clientY));
+
+/* ═══════════════════════════════════════
+   MAIN LOOP
+═══════════════════════════════════════ */
+function loop() {
+  drawStars();
+  drawMatrix();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', () => { resize(); initMatrix(); });
+resize();
+initMatrix();
+loop();
+</script>
+</body>
+</html>
